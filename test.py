@@ -1,5 +1,4 @@
 import unittest
-import urllib
 import urllib2
 from ftplib import FTP
 from stubserver import StubServer, FTPStubServer
@@ -93,19 +92,17 @@ class FTPTest(TestCase):
 
         ftp.storlines('STOR foo.txt', StringIO('cant believe its not bitter'))
         ftp.quit()
-        ftp.close()
         self.assertTrue(self.server.files("foo.txt"))
 
     def test_put_2_files_associates_the_correct_content_with_the_correct_filename(self):
         ftp = FTP()
         ftp.connect('localhost', self.port)
         ftp.set_debuglevel(0)
-        ftp.login('user2','other_pass')
+        ftp.login('user2', 'other_pass')
 
         ftp.storlines('STOR robot.txt', StringIO("\n".join(["file1 content" for i in range(1024)])))
         ftp.storlines('STOR monster.txt', StringIO("file2 content"))
         ftp.quit()
-        ftp.close()
         self.assertEquals("\r\n".join(["file1 content" for i in range(1024)]),
                           self.server.files("robot.txt").strip())
         self.assertEquals("file2 content", self.server.files("monster.txt").strip())
@@ -114,7 +111,7 @@ class FTPTest(TestCase):
         expected_content = 'content of my file\nis a complete mystery to me.'
         self.server.add_file('foo.txt', expected_content)
         ftp = FTP()
-        ftp.set_debuglevel(2)
+        ftp.set_debuglevel(0)
         ftp.connect('localhost', self.port)
         ftp.login('chris', 'tarttelin')
         directory_content = []
@@ -122,10 +119,9 @@ class FTPTest(TestCase):
         file_content = []
         ftp.retrlines('RETR foo.txt', lambda x: file_content.append(x))
         ftp.quit()
-        ftp.close()
         self.assertTrue('foo.txt' in '\n'.join(directory_content))
         self.assertEquals(expected_content, '\n'.join(file_content))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()
