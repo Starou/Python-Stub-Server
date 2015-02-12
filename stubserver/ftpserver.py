@@ -1,4 +1,5 @@
 import threading
+import re
 import time
 import SocketServer
 
@@ -54,6 +55,14 @@ class FTPServer(SocketServer.BaseRequestHandler):
         time.sleep(0.1)
         self.request.send('227 Entering Passive Mode. (127,0,0,1,%s,%s)\r\n' % (
             int((self.port + 1) / 256), (self.port + 1) % 256))
+
+    def _DELE(self, cmd):
+        filename = re.match(r"DELE (.*)\r\n", cmd).groups()[0]
+        self.files.pop(filename)
+        time.sleep(0.2)
+        self.request.send('250 file deleted\r\n')
+        self.t2.join(1)
+        # TODO code 450 or 550 if removal fails.
 
     def _STOR(self, cmd):
         self.request.send('150 Okay to send data\r\n')

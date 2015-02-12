@@ -122,6 +122,23 @@ class FTPTest(TestCase):
         self.assertTrue('foo.txt' in '\n'.join(directory_content))
         self.assertEquals(expected_content, '\n'.join(file_content))
 
+    def test_delete_file(self):
+        expected_content = 'Steve Zissou got a red hat and a Glock.'
+        self.server.add_file('secret_file.txt', expected_content)
+
+        ftp = FTP()
+        ftp.connect('localhost', self.port)
+        ftp.login('Bill', 'Murray')
+        directory_content = []
+        ftp.dir(lambda x: directory_content.append(x))
+        self.assertEqual(directory_content, ['secret_file.txt'])
+
+        ftp.delete('secret_file.txt')
+        directory_content = []
+        ftp.dir(lambda x: directory_content.append(x))
+        self.assertEqual(directory_content, [])
+        ftp.quit()
+
 
 if __name__ == '__main__':
     unittest.main()
